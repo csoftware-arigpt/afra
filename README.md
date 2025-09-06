@@ -1,9 +1,9 @@
-# `Audio Frequency Response Analyzer`
+# Audio Frequency Response Analyzer
 
-`A Python-based tool for analyzing audio files and evaluating their frequency
-response characteristics in the 10-40kHz range.`
+A Python-based tool for analyzing audio files and evaluating their frequency
+response characteristics in the 10-40kHz range.
 
-## `Features`
+## Features
 
 - `Spectral Analysis: Power Spectral Density (PSD) calculation using FFT`
 - `Quality Assessment: Automated evaluation of frequency response using a
@@ -13,35 +13,35 @@ response characteristics in the 10-40kHz range.`
 - `Theme Support: Dark, light, and high-contrast visualization themes`
 - `Export Capabilities: Save plots as high-resolution images`
 
-## `Installation`
+## Installation
 
-1.  `Ensure Python 3.7+ is installed`
-2.  `Install required dependencies:`
-
-```bash
-**pip install -r requirements.txt**
-```
-## `Usage`
-
-`Basic Analysis`
+1.  Ensure Python 3.7+ is installed
+2.  Install required dependencies:
 
 ```bash
-**python main.py audiofile.wav**
+pip install -r requirements.txt
 ```
-## `Advanced Options`
+## Usage
+
+Basic Analysis
 
 ```bash
-**python main.py audiofile.wav \**
-**    --n_fft 8192 \          # FFT window size**
-**    --overlap 0.75 \        # Window overlap ratio (0-1)**
-**    --output plot.png \     # Save plot to file**
-**    --radar \               # Generate radar plot**
-**    --waterfall \           # Generate waterfall spectrogram**
-**    --theme dark            # Visualization theme**
+python main.py audiofile.wav
 ```
-## `Output Metrics`
+## Advanced Options
 
-`The analysis evaluates five key metrics:`
+```bash
+python main.py audiofile.wav \
+    --n_fft 8192 \          # FFT window size
+    --overlap 0.75 \        # Window overlap ratio (0-1)
+    --output plot.png \     # Save plot to file
+    --radar \               # Generate radar plot
+    --waterfall \           # Generate waterfall spectrogram
+    --theme dark            # Visualization theme
+```
+## Output Metrics
+
+The analysis evaluates five key metrics:
 
 
 |Metric     |Description                                               |Score Range|Interpretation                                               |
@@ -53,7 +53,7 @@ response characteristics in the 10-40kHz range.`
 |`Artifacts`|`Detects unwanted artifacts and anomalies in the spectrum`|`0-20`     |`Higher scores indicate fewer artifacts and cleaner signal`  |
 |`Total Score`|`Overall quality assessment (weighted average of metrics)`|`0-100`    |`Comprehensive quality indicator`                            |
 
-## `Score Interpretation Guide`
+## Score Interpretation Guide
 
 
 |Score Range|Quality Level|Description                                       |
@@ -65,7 +65,7 @@ response characteristics in the 10-40kHz range.`
 |`50-59`    |`Poor`       |`Below average with significant issues`           |
 |`0-49`     |`Very Poor`  |`Severe frequency response problems`              |
 
-## `Supported Formats`
+## Supported Formats
 
-`All audio formats readable by SciPy (WAV, MP3, FLAC, etc.).`
+All audio formats readable by SciPy (WAV, MP3, FLAC, etc.).
 
