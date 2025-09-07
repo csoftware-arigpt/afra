@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from constants import BANDS
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.colors as mcolors
 
 class AudioVisualizer:
     def __init__(self, theme='dark'):
@@ -40,6 +38,7 @@ class AudioVisualizer:
                 'secondary': '#81C784',
                 'warning': '#FF8A65'
             }
+
     def create_spectrum_plot(self, freqs, psd_db, metrics, scores, total, filename, fs):
         fig, (ax1, ax2) = plt.subplots(
             2, 1, figsize=(16, 10),
@@ -47,25 +46,25 @@ class AudioVisualizer:
             facecolor=self.colors['background']
         )
 
-        line = ax1.semilogx(freqs, psd_db,
-                           color=self.colors['accent'],
-                           alpha=0.8,
-                           linewidth=2,
-                           antialiased=True)
+        ax1.semilogx(freqs, psd_db,
+                     color=self.colors['accent'],
+                     alpha=0.8,
+                     linewidth=2,
+                     antialiased=True)
 
         ax1.set_xlabel("Frequency (Hz)",
-                      fontsize=12,
-                      color=self.colors['text'],
-                      fontweight='bold')
+                       fontsize=12,
+                       color=self.colors['text'],
+                       fontweight='bold')
         ax1.set_ylabel("Power (dB)",
-                      fontsize=12,
-                      color=self.colors['text'],
-                      fontweight='bold')
+                       fontsize=12,
+                       color=self.colors['text'],
+                       fontweight='bold')
 
         ax1.grid(which='both',
-                linestyle='-',
-                alpha=0.3,
-                color=self.colors['grid'])
+                 linestyle='-',
+                 alpha=0.3,
+                 color=self.colors['grid'])
         ax1.set_xlim(10, 40000)
         ax1.margins(y=0.2)
 
@@ -76,30 +75,28 @@ class AudioVisualizer:
         for i, (band, (f_low, f_high)) in enumerate(BANDS.items()):
             color_idx = i / len(BANDS)
             band_color = plt.cm.Set3(color_idx)
-
             ax1.axvspan(f_low, f_high, alpha=0.15, color=band_color)
-            # Перемещаем текст в нижнюю часть графика
             ax1.text(
-                (f_low + f_high) / 2, -0.15, band,  # Изменили y-координату на отрицательную
+                (f_low + f_high) / 2, -0.15, band,
                 transform=ax1.get_xaxis_transform(),
-                ha='center', va='top',  # Изменили выравнивание по вертикали на 'top'
+                ha='center', va='top',
                 fontsize=11,
                 fontweight='bold',
                 rotation=0,
                 color=self.colors['text'],
                 bbox=dict(boxstyle='round,pad=0.3',
-                         facecolor=self.colors['background'],
-                         alpha=0.8,
-                         edgecolor=self.colors['grid'])
+                          facecolor=self.colors['background'],
+                          alpha=0.8,
+                          edgecolor=self.colors['grid'])
             )
 
         nyquist = fs / 2
         if nyquist < 40000:
             ax1.axvline(nyquist,
-                       color=self.colors['warning'],
-                       linestyle='--',
-                       alpha=0.8,
-                       linewidth=2)
+                        color=self.colors['warning'],
+                        linestyle='--',
+                        alpha=0.8,
+                        linewidth=2)
             ax1.text(
                 nyquist, -0.15, f'Nyquist ({nyquist:.0f} Hz)',
                 transform=ax1.get_xaxis_transform(),
@@ -108,36 +105,38 @@ class AudioVisualizer:
                 fontsize=10,
                 fontweight='bold',
                 bbox=dict(boxstyle='round,pad=0.2',
-                         facecolor=self.colors['background'],
-                         alpha=0.9)
+                          facecolor=self.colors['background'],
+                          alpha=0.9)
             )
 
-        band_names = list(BANDS.keys()) + ['flatness', 'centroid']
-        band_scores = [scores.get(b, 0) for b in band_names]
-        colors = plt.cm.viridis(np.linspace(0, 1, len(band_names)))
+        band_names = list(BANDS.keys())
+        extra_names = [k for k in scores.keys() if k not in BANDS]
+        all_names = band_names + extra_names
+        band_scores = [scores.get(b, 0) for b in all_names]
+        colors = plt.cm.viridis(np.linspace(0, 1, len(all_names)))
 
-        bars = ax2.bar(range(len(band_names)), band_scores,
-                      color=colors,
-                      alpha=0.8,
-                      edgecolor=self.colors['background'],
-                      linewidth=1)
+        bars = ax2.bar(range(len(all_names)), band_scores,
+                       color=colors,
+                       alpha=0.8,
+                       edgecolor=self.colors['background'],
+                       linewidth=1)
 
         ax2.set_title("Band and Metric Scores",
-                     pad=15,
-                     fontsize=14,
-                     fontweight='bold',
-                     color=self.colors['text'])
+                      pad=15,
+                      fontsize=14,
+                      fontweight='bold',
+                      color=self.colors['text'])
         ax2.set_ylabel("Score / 100",
-                      fontsize=12,
-                      color=self.colors['text'],
-                      fontweight='bold')
+                       fontsize=12,
+                       color=self.colors['text'],
+                       fontweight='bold')
         ax2.set_ylim(0, 110)
-        ax2.set_xticks(range(len(band_names)))
-        ax2.set_xticklabels(band_names,
-                           rotation=45,
-                           ha='right',
-                           fontsize=11,
-                           color=self.colors['text'])
+        ax2.set_xticks(range(len(all_names)))
+        ax2.set_xticklabels(all_names,
+                            rotation=45,
+                            ha='right',
+                            fontsize=11,
+                            color=self.colors['text'])
 
         ax2.tick_params(colors=self.colors['text'], labelsize=10)
         ax2.grid(axis='y', alpha=0.3, color=self.colors['grid'])
@@ -156,9 +155,10 @@ class AudioVisualizer:
             )
 
         fig.suptitle(f'Spectrum Analysis: {filename}',
-                    fontsize=16,
-                    fontweight='bold',
-                    color=self.colors['text'],
-                    y=0.98)
+                     fontsize=16,
+                     fontweight='bold',
+                     color=self.colors['text'],
+                     y=0.98)
 
         return fig
+
