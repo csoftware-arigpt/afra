@@ -9,6 +9,9 @@ packaging==25.0
 pillow==11.3.0
 pycparser==2.22
 pyparsing==3.2.3
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.17
+PyQt5_sip==12.17.1
 python-dateutil==2.9.0.post0
 scipy==1.16.1
 six==1.17.0

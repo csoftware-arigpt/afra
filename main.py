@@ -3,7 +3,15 @@ import argparse
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
+import matplotlib
+backends = ['Qt5Agg', 'Qt4Agg', 'TkAgg', 'MacOSX']
+for backend in backends:
+    try:
+        matplotlib.use(backend)
+        import matplotlib.pyplot as plt
+        break
+    except:
+        continue
 
 from audio_processor import AudioProcessor
 from analyzer import AudioAnalyzer
