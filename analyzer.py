@@ -1,6 +1,8 @@
 import numpy as np
 from constants import BANDS, WEIGHTS, TARGETS
 from audio_processor import AudioProcessor
+from spectral_analytics import SpectralAnalytics
+from lossless_check import LosslessChecker
 
 class AudioAnalyzer:
     METRIC_NAMES = {
@@ -11,7 +13,15 @@ class AudioAnalyzer:
         'snr_db': 'Signal-to-Noise Ratio (dB)',
         'crest_db': 'Crest Factor (dB)',
         'dyn_range_db': 'Dynamic Range (dB)',
-        'loudness_dbfs': 'Loudness (dBFS)'
+        'loudness_dbfs': 'Loudness (dBFS)',
+        'spread': 'Spectral Spread',
+        'skewness': 'Spectral Skewness',
+        'kurtosis': 'Spectral Kurtosis',
+        'entropy': 'Spectral Entropy',
+        'slope': 'Spectral Slope',
+        'decrease': 'Spectral Decrease',
+        'contrast': 'Spectral Contrast',
+        'bandwidth': 'Spectral Bandwidth'
     }
 
     @staticmethod
@@ -45,6 +55,14 @@ class AudioAnalyzer:
         raw_metrics['crest_db'] = float(AudioProcessor.crest_factor_db(data))
         raw_metrics['dyn_range_db'] = float(AudioProcessor.dynamic_range_db(data))
         raw_metrics['loudness_dbfs'] = float(AudioProcessor.rms_dbfs(data))
+        raw_metrics['spread'] = SpectralAnalytics.spectral_spread(freqs, psd_aw, raw_metrics['centroid'])
+        raw_metrics['skewness'] = SpectralAnalytics.spectral_skewness(freqs, psd_aw)
+        raw_metrics['kurtosis'] = SpectralAnalytics.spectral_kurtosis(freqs, psd_aw)
+        raw_metrics['entropy'] = SpectralAnalytics.spectral_entropy(psd_aw)
+        raw_metrics['slope'] = SpectralAnalytics.spectral_slope(freqs, psd_aw)
+        raw_metrics['decrease'] = SpectralAnalytics.spectral_decrease(psd_aw)
+        raw_metrics['contrast'] = SpectralAnalytics.spectral_contrast(freqs, psd_aw)
+        raw_metrics['bandwidth'] = SpectralAnalytics.spectral_bandwidth(freqs, psd_aw)
         raw_scores = {}
         for name, value in raw_metrics.items():
             target, tol = TARGETS.get(name, (0.0, 1.0))
@@ -61,10 +79,11 @@ class AudioAnalyzer:
                 display_name = AudioAnalyzer.METRIC_NAMES.get(key, key)
             metrics_hr[display_name] = val
             scores_hr[display_name] = raw_scores[key]
-        return freqs, psd_aw, metrics_hr, scores_hr, float(round(total, 2))
+        lossless = LosslessChecker.analyze(freqs, psd, fs)
+        return freqs, psd_aw, metrics_hr, scores_hr, float(round(total, 2)), lossless
 
     @staticmethod
-    def generate_report(metrics, scores, total, filename, fs):
+    def generate_report(metrics, scores, total, filename, fs, lossless=None):
         report = []
         report.append(f"Audio Analysis Report: {filename}")
         report.append(f"Sample Rate: {fs} Hz")
@@ -77,9 +96,23 @@ class AudioAnalyzer:
         for k in extra:
             val = metrics[k]
             sc = scores[k]
-            unit = "Hz" if "Centroid" in k or "Rolloff" in k else "dB" if any(x in k for x in ["dB", "Loudness"]) else ""
+            if any(x in k for x in ["Centroid", "Rolloff", "Spread", "Bandwidth"]):
+                unit = "Hz"
+            elif "Slope" in k:
+                unit = "dB/decade"
+            elif any(x in k for x in ["dB", "Loudness", "Contrast"]):
+                unit = "dB"
+            else:
+                unit = ""
             report.append(f"  {k:25}: {val:10.2f} {unit} → {sc:6.2f}/100")
         max_freq = fs / 2
         report.append(f"\nFrequency Range: 10 Hz - {max_freq:.0f} Hz")
+        if lossless:
+            report.append("\nLossless Authenticity Check:")
+            report.append(f"  Spectral Cutoff       : {lossless['cutoff_hz']:8.0f} Hz")
+            report.append(f"  Brick-wall Drop       : {lossless['brickwall_drop_db']:8.2f} dB")
+            report.append(f"  Suspected Format      : {lossless['suspected_format']}")
+            report.append(f"  Verdict               : {lossless['verdict']}")
+            report.append(f"  Confidence            : {lossless['confidence'] * 100:6.1f}%")
         report.append(f"\nOverall Score: {total:6.2f}/100")
         return "\n".join(report)

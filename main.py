@@ -24,7 +24,8 @@ def main():
     parser.add_argument("--overlap", type=float, default=0.75, help="Window overlap ratio (0–1)")
     parser.add_argument("--output", "-o", help="Save plot to file")
     parser.add_argument("--radar", action="store_true", help="Generate radar plot")
-    parser.add_argument("--waterfall", action="store_true", help="Generate waterfall plot")
+    parser.add_argument("--waterfall", "--spectrogram", dest="waterfall", action="store_true",
+                        help="Generate spectrogram (waterfall) plot")
     parser.add_argument("--theme", default="dark", choices=["dark", "light", "high_contrast"],
                         help="Visualization theme")
     args = parser.parse_args()
@@ -38,22 +39,29 @@ def main():
 
         data, fs = AudioProcessor.load_audio(args.filename)
 
-        freqs, psd_aw, metrics, scores, total = AudioAnalyzer.evaluate(
+        freqs, psd_aw, metrics, scores, total, lossless = AudioAnalyzer.evaluate(
             data, fs, n_fft=args.n_fft, overlap=args.overlap
         )
 
         psd_db = 10 * np.log10(psd_aw + 1e-12)
 
-        report = AudioAnalyzer.generate_report(metrics, scores, total, os.path.basename(args.filename), fs)
+        report = AudioAnalyzer.generate_report(
+            metrics, scores, total, os.path.basename(args.filename), fs, lossless=lossless
+        )
         print(report)
 
         if args.waterfall and hasattr(visualizer, "create_waterfall_plot"):
-            fig = visualizer.create_waterfall_plot(freqs, psd_db, os.path.basename(args.filename), fs)
+            fig = visualizer.create_waterfall_plot(
+                data, fs, metrics, os.path.basename(args.filename), lossless=lossless,
+                n_fft=args.n_fft, overlap=args.overlap,
+            )
         elif args.radar and hasattr(visualizer, "create_radar_plot"):
             fig = visualizer.create_radar_plot(scores)
         else:
-            fig = visualizer.create_spectrum_plot(freqs, psd_db, metrics, scores, total,
-                                                  os.path.basename(args.filename), fs)
+            fig = visualizer.create_spectrum_plot(
+                freqs, psd_db, metrics, scores, total,
+                os.path.basename(args.filename), fs, lossless=lossless,
+            )
 
         if args.output:
             plt.savefig(args.output, dpi=300, bbox_inches='tight')

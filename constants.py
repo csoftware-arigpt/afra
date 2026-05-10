@@ -27,7 +27,15 @@ WEIGHTS = {
     'Signal‑to‑Noise Ratio (dB)': 0.05,
     'Crest Factor (dB)': 0.03,
     'Dynamic Range (dB)': 0.03,
-    'Loudness (dBFS)': 0.02
+    'Loudness (dBFS)': 0.02,
+    'Spectral Spread': 0.03,
+    'Spectral Skewness': 0.02,
+    'Spectral Kurtosis': 0.02,
+    'Spectral Entropy': 0.03,
+    'Spectral Slope': 0.03,
+    'Spectral Decrease': 0.02,
+    'Spectral Contrast': 0.03,
+    'Spectral Bandwidth': 0.03
 }
 
 TARGETS = {
@@ -47,5 +55,13 @@ TARGETS = {
     'Signal‑to‑Noise Ratio (dB)': (35, 10),
     'Crest Factor (dB)': (12, 4),
     'Dynamic Range (dB)': (10, 4),
-    'Loudness (dBFS)': (-18, 3)
+    'Loudness (dBFS)': (-18, 3),
+    'Spectral Spread': (4000, 2000),
+    'Spectral Skewness': (1.5, 1.5),
+    'Spectral Kurtosis': (5.0, 4.0),
+    'Spectral Entropy': (0.7, 0.2),
+    'Spectral Slope': (-10.0, 5.0),
+    'Spectral Decrease': (-0.001, 0.005),
+    'Spectral Contrast': (20.0, 10.0),
+    'Spectral Bandwidth': (4000, 2000)
 }
